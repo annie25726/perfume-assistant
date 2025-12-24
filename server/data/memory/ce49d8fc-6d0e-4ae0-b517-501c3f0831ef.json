@@ -1,0 +1,14 @@
+{
+  "sessionId": "ce49d8fc-6d0e-4ae0-b517-501c3f0831ef",
+  "messages": [
+    {
+      "role": "user",
+      "content": "給啊"
+    },
+    {
+      "role": "assistant",
+      "content": "不知道你想問什麼事。可以試試描述一下你想知道的東西，我會盡量幫助你。"
+    }
+  ],
+  "intentState": null
+}

@@ -1,0 +1,13 @@
+{
+  "sessionId": "cbfc4d34-1b0d-4f15-9736-ba7848f01c55",
+  "messages": [
+    {
+      "role": "user",
+      "content": "如果客戶對木質香不排斥，但怕太厚重，夏天可以怎麼調？"
+    },
+    {
+      "role": "assistant",
+      "content": ""
+    }
+  ]
+}

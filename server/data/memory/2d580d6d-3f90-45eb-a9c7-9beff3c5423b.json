@@ -1,0 +1,8 @@
+{
+  "sessionId": "2d580d6d-3f90-45eb-a9c7-9beff3c5423b",
+  "messages": [],
+  "intentState": {
+    "intent": "weather",
+    "done": true
+  }
+}

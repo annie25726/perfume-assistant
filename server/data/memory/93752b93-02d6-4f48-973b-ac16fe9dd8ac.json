@@ -1,0 +1,11 @@
+{
+  "sessionId": "93752b93-02d6-4f48-973b-ac16fe9dd8ac",
+  "messages": [],
+  "intentState": {
+    "intent": "weather",
+    "done": true,
+    "data": {
+      "city": "台北"
+    }
+  }
+}

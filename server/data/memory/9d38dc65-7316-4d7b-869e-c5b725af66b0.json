@@ -1,0 +1,22 @@
+{
+  "sessionId": "9d38dc65-7316-4d7b-869e-c5b725af66b0",
+  "messages": [
+    {
+      "role": "user",
+      "content": "最近有什麼好看的電影嗎"
+    },
+    {
+      "role": "assistant",
+      "content": "最近有很多好看的電影，但是我不知道最新的資訊。建議您查詢最新的電影評論或票房排行榜，例如 Google 搜尋、IMDb 或豆瓣等網站。"
+    },
+    {
+      "role": "user",
+      "content": "你可以幫我看嗎"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！我可以幫助您解答有關任何問題。您想問什麼呢？"
+    }
+  ],
+  "intentState": null
+}

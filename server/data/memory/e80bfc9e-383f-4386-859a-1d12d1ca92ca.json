@@ -1,0 +1,25 @@
+{
+  "sessionId": "e80bfc9e-383f-4386-859a-1d12d1ca92ca",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！有什麼我可以幫您解答的問題嗎？"
+    },
+    {
+      "role": "user",
+      "content": "能陪我聊天嗎"
+    },
+    {
+      "role": "assistant",
+      "content": "當然可以！我很樂意和您聊天，無論是聊天的主題還是您想要討論的任何事情，我都會盡力幫助您。您想聊什麼呢？是關於生活、學習、工作還是其他主題？我在這裡等待您的回覆。"
+    }
+  ],
+  "intentState": {
+    "intent": "weather",
+    "done": false
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "sessionId": "6c2b7c82-cb90-4d2d-97a4-f87cf237d339",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！有什麼我可以幫您解答的問題嗎？"
+    }
+  ],
+  "intentState": {
+    "intent": "weather",
+    "step": "done",
+    "done": true,
+    "data": {
+      "region": "中部"
+    }
+  }
+}

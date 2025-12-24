@@ -1,0 +1,41 @@
+{
+  "sessionId": "236992f7-03c1-4896-b5ff-a2a8cd70030b",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你覺的今晚我能去那弄"
+    },
+    {
+      "role": "assistant",
+      "content": "嗨！你今晚有什麼計畫呢？天氣好像不太好，外面下著雨，所以可能不適合去戶外玩耍。有什麼其他的想法或計畫嗎？"
+    },
+    {
+      "role": "user",
+      "content": "去那玩啦"
+    },
+    {
+      "role": "assistant",
+      "content": "你想去哪裡玩呢？有什麼特別的想法或興趣呢？你可以跟我分享一下，讓我們一起探索一些好玩的選擇！"
+    },
+    {
+      "role": "user",
+      "content": "你有推的嗎"
+    },
+    {
+      "role": "assistant",
+      "content": "噗！你想知道我的推文嗎？😄 其實，我不是很常用的社交媒體，但我可以幫助你找一些好玩的活動或資源！你有什麼興趣或想法呢？讓我們一起探索一下！"
+    },
+    {
+      "role": "user",
+      "content": "問你啊"
+    },
+    {
+      "role": "assistant",
+      "content": "你有什麼問題或需要幫助嗎？😊 我在這裡幫助您解答有關香氛、清潔產品或其他相關主題的問題。期待您的回覆"
+    }
+  ],
+  "intentState": {
+    "intent": "weather",
+    "done": true
+  }
+}

@@ -1,0 +1,63 @@
+[
+  {
+    "question": "選",
+    "initial_engine": "ollama",
+    "final_engine": "chatgpt",
+    "reason": "generic_or_bad_general_answer",
+    "intent": "general",
+    "timestamp": "2025-12-17T08:12:42.183Z"
+  },
+  {
+    "question": "克立淨 他的清淨機 我該如何選",
+    "initial_engine": "ollama",
+    "final_engine": "chatgpt",
+    "reason": "generic_or_bad_product_answer",
+    "intent": "product",
+    "timestamp": "2025-12-17T08:12:57.508Z"
+  },
+  {
+    "question": "我打的是清淨機",
+    "initial_engine": "ollama",
+    "final_engine": "chatgpt",
+    "reason": "generic_or_bad_general_answer",
+    "intent": "general",
+    "timestamp": "2025-12-17T08:15:10.355Z"
+  },
+  {
+    "question": "我想做一個放在廁所的香氛，請給我配方",
+    "initial_engine": "forced",
+    "final_engine": "chatgpt",
+    "intent": "general",
+    "timestamp": "2025-12-17T08:25:58.324Z"
+  },
+  {
+    "question": "我今天上班心情還不錯也",
+    "initial_engine": "forced",
+    "final_engine": "chatgpt",
+    "intent": "general",
+    "timestamp": "2025-12-17T08:27:03.230Z"
+  },
+  {
+    "question": "你回答好沒人性，今天天氣幫我查一下，晚上會下雨嗎",
+    "initial_engine": "forced",
+    "final_engine": "chatgpt",
+    "intent": "general",
+    "timestamp": "2025-12-17T08:27:33.965Z"
+  },
+  {
+    "question": "高雄呢",
+    "initial_engine": "forced",
+    "final_engine": "chatgpt",
+    "reason": "learned_rule",
+    "intent": "general",
+    "timestamp": "2025-12-17T09:36:37.077Z"
+  },
+  {
+    "question": "高雄呢？",
+    "initial_engine": "forced",
+    "final_engine": "chatgpt",
+    "reason": "learned_rule",
+    "intent": "general",
+    "timestamp": "2025-12-17T11:25:37.471Z"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "sessionId": "51c455eb-6902-4c9b-9b06-2160ceab5b74",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": "API Error: https://api-inference.huggingface.co is no longer supported. Please use https://router.huggingface.co instead."
+    }
+  ],
+  "intentState": null
+}

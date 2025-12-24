@@ -1,0 +1,49 @@
+{
+  "sessionId": "f55983bb-cb55-462c-98e0-957514a60356",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你可以自我借紹一下"
+    },
+    {
+      "role": "assistant",
+      "content": "您好，我是來自台灣的一位專業顧問。目前我能幫助您解答關於香氛、清潔產品以及其他相關主題的問題。如果您有任何特定的問題或需要進一步的資訊，請隨時告訴我，我很樂意協助您。期待您的回覆！",
+      "meta": {
+        "route": "L1_RAG",
+        "max_score": 1,
+        "thresholds": {
+          "classify": 0.6,
+          "answer": 0.8,
+          "topK": 3
+        },
+        "rag_hits": [
+          {
+            "id": "d642bd4cff289370dc3eabeb06e31924afc28934",
+            "source": "learned",
+            "score": 1,
+            "raw_score": 0.0375
+          },
+          {
+            "id": "6467646677beca1f9668b69bda3cd73896b940b8",
+            "source": "learned",
+            "score": 1,
+            "raw_score": 0.0375
+          },
+          {
+            "id": "ca7a74eaecf6520730d9ab7681426be1979f5149",
+            "source": "learned-from-gpt",
+            "score": 0.9375,
+            "raw_score": 0.0375
+          }
+        ],
+        "usedMcp": false,
+        "learned": {
+          "savedToRag": false,
+          "savedToMemory": true,
+          "reasons": []
+        }
+      }
+    }
+  ],
+  "intentState": null
+}

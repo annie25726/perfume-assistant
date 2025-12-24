@@ -1,0 +1,22 @@
+{
+  "sessionId": "52d007ee-ec39-4b7a-b764-52d2b63e1b9e",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": " 您好！有什麼我可以幫您解答的問題嗎？(Reference: Q: hi - learned-from-gpt, score: 0.9375)"
+    },
+    {
+      "role": "user",
+      "content": "我今天心情不好該麼辦"
+    },
+    {
+      "role": "assistant",
+      "content": " 根據知識庫，當心情不好時，选择一些能提升情综的香氛可能会有所帮助。例如，清新香氛（如柑橘或草本香氛）能带来活力，花香（如薰衣草或茉莉花）能放松心情，木質香氣（如檀香或雪松）能带来安心感。你有哪种特別偏好的香氛吗？如果有需要，我很樂於幫您了解更多關於香氛配兼的知識。(Reference: KB1, KB2, KB3)"
+    }
+  ],
+  "intentState": null
+}

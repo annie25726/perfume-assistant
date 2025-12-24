@@ -1,0 +1,21 @@
+[
+  {
+    "id": "cleanstation_food_waste",
+    "name": "克立淨廚餘機",
+    "description": "高效分解廚餘、降低異味，適合小家庭與都會住宅使用。",
+    "features": [
+      "快速分解廚餘",
+      "降低異味",
+      "操作簡單"
+    ],
+    "use_cases": [
+      "家庭廚餘處理",
+      "公寓住宅"
+    ],
+    "official_links": {
+      "website": "https://www.cleanstation.com.tw/",
+      "shop": "https://ec.cleanstation.com.tw/",
+      "facebook": "https://www.facebook.com/cleanstation"
+    }
+  }
+]

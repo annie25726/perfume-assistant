@@ -1,0 +1,17 @@
+{
+  "sessionId": "745cbac4-1c08-4edf-8615-61993d156190",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！有什麼我可以幫您解答的問題嗎？"
+    }
+  ],
+  "intentState": {
+    "intent": "weather",
+    "done": true
+  }
+}
