@@ -6,350 +6,766 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
-body{font-family:system-ui,"Microsoft JhengHei";background:#FFF6CC;margin:0}
-.wrap{max-width:960px;margin:30px auto;background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.1)}
-header{padding:20px;font-size:22px;font-weight:700;color:#92400E}
-#log{padding:20px;height:420px;overflow:auto}
-.row{margin:12px 0;display:flex}
-.me{justify-content:flex-end}
-.bot{justify-content:flex-start}
-.bubble{max-width:70%;padding:14px 16px;border-radius:14px;line-height:1.6}
-.me .bubble{background:#F3F4F6}
-.bot .bubble{background:#EAF6EC}
-
-.weather-card{
-  background:#fff;
-  border-left:6px solid #FACC15;
-  padding:14px 16px;
-  border-radius:14px;
-  box-shadow:0 6px 16px rgba(0,0,0,.1);
-  max-width:360px
-}
-.weather-card h4{margin:0 0 8px;color:#92400E}
-.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px}
-
-.region-btns button{
-  margin:6px 6px 0 0;
-  padding:8px 14px;
-  border-radius:10px;
-  border:none;
-  background:#FACC15;
-  cursor:pointer;
-  font-weight:600
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.suggestion-cards{
-  margin-top:12px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", Roboto, sans-serif;
+  background: #343541;
+  color: #ececf1;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.suggestion-card{
-  padding:12px 16px;
-  background:#F9FAFB;
-  border:1px solid #E5E7EB;
-  border-radius:10px;
-  cursor:pointer;
-  transition:all 0.2s;
-  font-size:14px;
-  color:#374151;
+/* Header */
+header {
+  background: #202123;
+  padding: 12px 16px;
+  border-bottom: 1px solid #4d4d4f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.suggestion-card:hover{
-  background:#F3F4F6;
-  border-color:#D1D5DB;
-  transform:translateX(4px);
+header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ececf1;
 }
 
-.suggestion-card::before{
-  content:"💡 ";
-  margin-right:6px;
+.engine-indicator {
+  font-size: 12px;
+  color: #8e8ea0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-footer{padding:16px;border-top:1px solid #eee}
-.engine-bar{font-size:13px;color:#6B7280;margin:0 0 8px;display:flex;align-items:center;gap:8px}
-.engine-pill{background:#F3F4F6;color:#374151;border-radius:999px;padding:4px 10px;font-weight:700}
-.input-row{display:flex;gap:10px}
-textarea{flex:1;min-height:44px;max-height:120px;padding:10px;border-radius:10px;border:1px solid #ddd;resize:none;overflow-y:auto;font-family:inherit;line-height:1.5}
-button.send{width:90px;border:none;border-radius:10px;background:#FACC15;font-weight:700}
-button.send:disabled{opacity:.6;cursor:not-allowed}
+.engine-pill {
+  background: #40414f;
+  color: #ececf1;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
 
-/* Thinking dots */
-.dots::after{content:"";display:inline-block;width:14px;animation:dots 1.2s infinite steps(4)}
-@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}100%{content:""}}
+/* Chat Container */
+#log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 0;
+  background: #343541;
+}
+
+#log::-webkit-scrollbar {
+  width: 8px;
+}
+
+#log::-webkit-scrollbar-track {
+  background: #343541;
+}
+
+#log::-webkit-scrollbar-thumb {
+  background: #565869;
+  border-radius: 4px;
+}
+
+#log::-webkit-scrollbar-thumb:hover {
+  background: #6e6e80;
+}
+
+/* Message Rows */
+.message-row {
+  display: flex;
+  padding: 16px 0;
+  gap: 16px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-row.user {
+  background: #343541;
+}
+
+.message-row.assistant {
+  background: #444654;
+}
+
+.message-row.user .message-content {
+  margin-left: auto;
+  max-width: 85%;
+}
+
+.message-row.assistant .message-content {
+  max-width: 85%;
+}
+
+/* Avatar */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.avatar.user {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.avatar.assistant {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+/* Message Bubble */
+.message-bubble {
+  background: transparent;
+  padding: 0;
+  line-height: 1.75;
+  font-size: 16px;
+  color: #ececf1;
+  word-wrap: break-word;
+}
+
+.message-row.user .message-bubble {
+  background: #10a37f;
+  padding: 12px 16px;
+  border-radius: 18px 18px 4px 18px;
+  color: white;
+  max-width: 100%;
+}
+
+.message-row.assistant .message-bubble {
+  padding: 0;
+}
+
+.message-bubble p {
+  margin: 0 0 12px 0;
+}
+
+.message-bubble p:last-child {
+  margin-bottom: 0;
+}
+
+/* Source Info */
+.source-info {
+  font-size: 11px;
+  color: #8e8ea0;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #4d4d4f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Suggestion Cards */
+.suggestion-cards {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.suggestion-card {
+  background: #40414f;
+  border: 1px solid #565869;
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #ececf1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggestion-card:hover {
+  background: #565869;
+  border-color: #8e8ea0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.suggestion-card::before {
+  content: "💡";
+  font-size: 16px;
+}
+
+/* Weather City Selection Cards */
+.weather-city-cards {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.weather-city-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.weather-city-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.weather-city-card::before {
+  content: "📍";
+  display: block;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+/* Weather Display Card */
+.weather-display-card {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 16px;
+  color: white;
+  box-shadow: 0 4px 16px rgba(245, 87, 108, 0.3);
+}
+
+.weather-display-card h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weather-display-card h3::before {
+  content: "☀️";
+  font-size: 24px;
+}
+
+.weather-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.weather-info-item {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.weather-info-item strong {
+  display: block;
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.weather-info-item span {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Region Buttons */
+.region-buttons {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.region-button {
+  background: #40414f;
+  border: 1px solid #565869;
+  border-radius: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #ececf1;
+  font-weight: 500;
+}
+
+.region-button:hover {
+  background: #565869;
+  border-color: #8e8ea0;
+  transform: translateY(-2px);
+}
+
+/* Input Area */
+footer {
+  background: #202123;
+  border-top: 1px solid #4d4d4f;
+  padding: 16px;
+}
+
+.input-container {
+  max-width: 768px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.input-wrapper {
+  background: #40414f;
+  border: 1px solid #565869;
+  border-radius: 24px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+  border-color: #8e8ea0;
+}
+
+textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #ececf1;
+  font-size: 16px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  min-height: 24px;
+  max-height: 200px;
+  line-height: 1.5;
+  padding: 0;
+}
+
+textarea::placeholder {
+  color: #8e8ea0;
+}
+
+.send-button {
+  background: #10a37f;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  color: white;
+  font-size: 16px;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #0d8f6e;
+  transform: scale(1.05);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-button::before {
+  content: "➤";
+}
+
+/* Thinking Animation */
+.thinking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8e8ea0;
+  font-size: 14px;
+}
+
+.thinking-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.thinking-dots span {
+  width: 6px;
+  height: 6px;
+  background: #8e8ea0;
+  border-radius: 50%;
+  animation: thinking 1.4s infinite;
+}
+
+.thinking-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes thinking {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+/* Debug Info */
+.debug-info {
+  background: #2d2d2d;
+  border: 1px dashed #565869;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #8e8ea0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .message-row .message-content {
+    max-width: 90% !important;
+  }
+  
+  .suggestion-cards,
+  .weather-city-cards {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
 
 <body>
-<div class="wrap">
-<header>Perfume AI 顧問</header>
-<div id="log"></div>
-<footer>
-  <div class="engine-bar">
-    <span>🤖 目前使用：</span>
+<header>
+  <h1>🤖 Perfume AI 顧問</h1>
+  <div class="engine-indicator">
+    <span>使用：</span>
     <span id="engine" class="engine-pill">準備中</span>
   </div>
-  <div class="input-row">
-    <textarea id="msg" placeholder="輸入問題…"></textarea>
-    <button id="sendBtn" class="send" onclick="send()">送出</button>
+</header>
+
+<div id="log"></div>
+
+<footer>
+  <div class="input-container">
+    <div class="input-wrapper">
+      <textarea id="msg" placeholder="輸入訊息..." rows="1"></textarea>
+      <button id="sendBtn" class="send-button" onclick="send()" title="送出 (Enter)"></button>
+    </div>
   </div>
 </footer>
-</div>
 
 <script>
-const log=document.getElementById("log");
-const msg=document.getElementById("msg");
-const engineEl=document.getElementById("engine");
-const sendBtn=document.getElementById("sendBtn");
-let sessionId="";
-let thinkingEl=null;
+const log = document.getElementById("log");
+const msg = document.getElementById("msg");
+const engineEl = document.getElementById("engine");
+const sendBtn = document.getElementById("sendBtn");
+let sessionId = "";
+let thinkingEl = null;
 
-function humanEngineLabel(engine, modelInfo){
+function humanEngineLabel(engine, modelInfo) {
   if (modelInfo) {
     const provider = modelInfo.provider || "";
     const model = modelInfo.model || "";
-    const api = modelInfo.api || "";
     
     if (provider === "Hugging Face") {
-      return `🤗 ${model}`;
+      return `🤗 ${model.split("/").pop()}`;
     } else if (provider === "OpenAI") {
       return `🧠 ${model}`;
     } else if (provider === "CWA") {
-      return `☀️ ${api}`;
+      return `☀️ 天氣 API`;
     }
-    return `${api} - ${model}`;
+    return `${model}`;
   }
   
-  const map={
-    "L1_RAG":"⚡ 本地 Ollama + RAG",
-    "L2":"🧠 ChatGPT（高品質）",
-    "L2_RAG":"🧠 ChatGPT + RAG",
-    "MCP_DIRECT":"📌 MCP（直接回答）",
-    "TOOL_WEATHER":"☀️ 天氣工具",
-    "weather":"☀️ 天氣工具",
-    "huggingface+rag":"🤗 Hugging Face",
-    "chatgpt+rag":"🧠 ChatGPT",
-    "error":"⚠️ 系統錯誤"
+  const map = {
+    "huggingface+rag": "🤗 Hugging Face",
+    "chatgpt+rag": "🧠 ChatGPT",
+    "weather": "☀️ 天氣工具",
+    "error": "⚠️ 錯誤"
   };
-  return map[engine] || engine || "準備中";
+  return map[engine] || "準備中";
 }
 
-function setEngine(engine, modelInfo){
-  engineEl.textContent=humanEngineLabel(engine, modelInfo);
+function setEngine(engine, modelInfo) {
+  engineEl.textContent = humanEngineLabel(engine, modelInfo);
 }
 
-function add(role, html, modelInfo){
-  const row=document.createElement("div");
-  row.className="row "+(role==="user"?"me":"bot");
-  const bubble=document.createElement("div");
-  bubble.className="bubble";
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatMessage(text) {
+  // 將換行轉換為 <br>
+  return escapeHtml(text).replace(/\n/g, "<br>");
+}
+
+function addMessage(role, content, modelInfo = null) {
+  const row = document.createElement("div");
+  row.className = `message-row ${role}`;
+  
+  const avatar = document.createElement("div");
+  avatar.className = `avatar ${role}`;
+  avatar.textContent = role === "user" ? "你" : "AI";
+  
+  const messageContent = document.createElement("div");
+  messageContent.className = "message-content";
+  
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+  bubble.innerHTML = formatMessage(content);
   
   // 如果是 bot 回覆且有模型資訊，顯示來源
-  if (role === "bot" && modelInfo) {
+  if (role === "assistant" && modelInfo) {
     const sourceInfo = document.createElement("div");
-    sourceInfo.style.fontSize = "11px";
-    sourceInfo.style.color = "#6B7280";
-    sourceInfo.style.marginTop = "8px";
-    sourceInfo.style.paddingTop = "8px";
-    sourceInfo.style.borderTop = "1px solid #E5E7EB";
-    sourceInfo.innerHTML = `📌 來源：${modelInfo.provider || ""} - ${modelInfo.model || ""} (${modelInfo.api || ""})`;
-    bubble.innerHTML = html;
+    sourceInfo.className = "source-info";
+    sourceInfo.innerHTML = `📌 ${modelInfo.provider || ""} - ${modelInfo.model || ""}`;
     bubble.appendChild(sourceInfo);
-  } else {
-    bubble.innerHTML = html;
   }
   
-  row.appendChild(bubble);
+  messageContent.appendChild(bubble);
+  row.appendChild(avatar);
+  row.appendChild(messageContent);
   log.appendChild(row);
-  log.scrollTop=log.scrollHeight;
-}
-function escapeHtml(str){
-  return String(str ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+  log.scrollTop = log.scrollHeight;
+  
+  return bubble;
 }
 
-function addDebug(debug){
-  const row=document.createElement("div");
-  row.className="row bot";
-  const bubble=document.createElement("div");
-  bubble.className="bubble";
-  bubble.style.background="#F3F4F6";
-  bubble.style.color="#111827";
-  bubble.style.border="1px dashed #D1D5DB";
-
-  const pretty = escapeHtml(JSON.stringify(debug, null, 2));
-  bubble.innerHTML = `
-    <details class="debug">
-      <summary>Debug（展開/收合）</summary>
-      <pre style="white-space:pre-wrap;margin:8px 0 0">${pretty}</pre>
-    </details>
+function addThinking() {
+  const row = document.createElement("div");
+  row.className = "message-row assistant";
+  
+  const avatar = document.createElement("div");
+  avatar.className = "avatar assistant";
+  avatar.textContent = "AI";
+  
+  const messageContent = document.createElement("div");
+  messageContent.className = "message-content";
+  
+  const thinking = document.createElement("div");
+  thinking.className = "thinking";
+  thinking.innerHTML = `
+    <span>思考中</span>
+    <div class="thinking-dots">
+      <span></span><span></span><span></span>
+    </div>
   `;
-  row.appendChild(bubble);
+  
+  messageContent.appendChild(thinking);
+  row.appendChild(avatar);
+  row.appendChild(messageContent);
   log.appendChild(row);
-  log.scrollTop=log.scrollHeight;
+  log.scrollTop = log.scrollHeight;
+  
+  return row;
 }
 
-
-function addWeather(w){
-  const row=document.createElement("div");
-  row.className="row bot";
-  const card=document.createElement("div");
-  card.className="weather-card";
-  card.innerHTML=`
-    <h4>📍 ${w.city || w.location || ""}</h4>
-    <div class="weather-grid">
-      <div>☁️ 天氣：${w.weather || w.desc || "-"}</div>
-      <div>🌡 溫度：${(w.minTemp && w.maxTemp) ? `${w.minTemp}～${w.maxTemp}°C` : (w.temp || "-")}</div>
-      <div>🌧 降雨：${w.rain || "-"}%</div>
-    </div>`;
-  row.appendChild(card);
-  log.appendChild(row);
-  log.scrollTop=log.scrollHeight;
+function addSuggestionCards(suggestions, bubble) {
+  if (!suggestions || suggestions.length === 0) return;
+  
+  const cardsContainer = document.createElement("div");
+  cardsContainer.className = "suggestion-cards";
+  
+  suggestions.forEach(suggestion => {
+    const card = document.createElement("div");
+    card.className = "suggestion-card";
+    card.textContent = suggestion;
+    card.onclick = () => {
+      cardsContainer.remove();
+      send(suggestion);
+    };
+    cardsContainer.appendChild(card);
+  });
+  
+  bubble.appendChild(cardsContainer);
 }
 
-function regionButtons(options){
-  const opts = options && options.length ? options : ["北部","中部","南部","東部","全台"];
-  return `
-  <div class="region-btns">
-    ${opts.map(o => `<button onclick="quick('${o}')">${o}</button>`).join("")}
-  </div>`;
+function addWeatherCityCards(bubble) {
+  const cities = ["台北", "新北", "桃園", "新竹", "台中", "台南", "高雄", "花蓮", "台東"];
+  
+  const cardsContainer = document.createElement("div");
+  cardsContainer.className = "weather-city-cards";
+  
+  cities.forEach(city => {
+    const card = document.createElement("div");
+    card.className = "weather-city-card";
+    card.textContent = city;
+    card.onclick = () => {
+      cardsContainer.remove();
+      send(`${city}天氣`);
+    };
+    cardsContainer.appendChild(card);
+  });
+  
+  bubble.appendChild(cardsContainer);
+}
+
+function addWeatherDisplay(weatherData) {
+  const row = document.createElement("div");
+  row.className = "message-row assistant";
+  
+  const avatar = document.createElement("div");
+  avatar.className = "avatar assistant";
+  avatar.textContent = "AI";
+  
+  const messageContent = document.createElement("div");
+  messageContent.className = "message-content";
+  
+  const weatherCard = document.createElement("div");
+  weatherCard.className = "weather-display-card";
+  weatherCard.innerHTML = `
+    <h3>${weatherData.city || "天氣資訊"}</h3>
+    <div class="weather-info">
+      <div class="weather-info-item">
+        <strong>🌡 氣溫</strong>
+        <span>${weatherData.temp || weatherData.temperature || "N/A"}</span>
+      </div>
+      <div class="weather-info-item">
+        <strong>🌧 降雨機率</strong>
+        <span>${weatherData.rain || "N/A"}%</span>
+      </div>
+    </div>
+  `;
+  
+  messageContent.appendChild(weatherCard);
+  row.appendChild(avatar);
+  row.appendChild(messageContent);
+  log.appendChild(row);
+  log.scrollTop = log.scrollHeight;
 }
 
 // 自動調整 textarea 高度
 function adjustTextareaHeight() {
   msg.style.height = "auto";
-  msg.style.height = Math.min(msg.scrollHeight, 120) + "px";
+  msg.style.height = Math.min(msg.scrollHeight, 200) + "px";
 }
 
 msg.addEventListener("input", adjustTextareaHeight);
 
-async function send(text){
-  const content=text||msg.value.trim();
-  if(!content) return;
-  msg.value="";
-  msg.style.height = "44px"; // 重置高度
+async function send(text) {
+  const content = text || msg.value.trim();
+  if (!content) return;
+  
+  msg.value = "";
+  msg.style.height = "auto";
   
   // 移除所有建議卡片
-  document.querySelectorAll(".suggestion-cards").forEach(el => el.remove());
+  document.querySelectorAll(".suggestion-cards, .weather-city-cards").forEach(el => el.remove());
   
-  add("user",content);
-
-  // UI: 思考中（像 ChatGPT 一樣）
-  sendBtn.disabled=true;
-  msg.disabled=true;
-  thinkingEl = document.createElement("div");
-  thinkingEl.className = "row bot";
-  thinkingEl.innerHTML = `<div class="bubble">🤔 AI 正在思考中<span class="dots"></span></div>`;
-  log.appendChild(thinkingEl);
-  log.scrollTop=log.scrollHeight;
-
-  let d=null;
-  try{
-    const r=await fetch("/api/chat",{
-      method:"POST",
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:content,sessionId})
+  // 顯示用戶訊息
+  addMessage("user", content);
+  
+  // 顯示思考中
+  sendBtn.disabled = true;
+  msg.disabled = true;
+  thinkingEl = addThinking();
+  
+  let d = null;
+  try {
+    const r = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: content, sessionId })
     });
-    d=await r.json();
-  }catch(e){
-    d={ 
-      engine:"error", 
-      reply:"連線失敗 😵 請確認 server 是否正在執行。",
+    d = await r.json();
+  } catch (e) {
+    d = {
+      engine: "error",
+      reply: "連線失敗 😵 請確認 server 是否正在執行。",
       modelInfo: { model: "系統錯誤", api: "本地", provider: "System" }
     };
   }
-
-  // UI: 結束思考
-  if(thinkingEl){ thinkingEl.remove(); thinkingEl=null; }
-  sendBtn.disabled=false;
-  msg.disabled=false;
-
-  sessionId=d.sessionId||sessionId;
-
-  // 顯示這次走哪個平台
+  
+  // 移除思考中
+  if (thinkingEl) {
+    thinkingEl.remove();
+    thinkingEl = null;
+  }
+  sendBtn.disabled = false;
+  msg.disabled = false;
+  
+  sessionId = d.sessionId || sessionId;
   setEngine(d.engine, d.modelInfo);
-
-  // 回覆渲染
-  let replyHtml = d.reply;
-  if(d.ui?.needLocation){
-    replyHtml += regionButtons(d.ui?.options);
+  
+  // 顯示回覆
+  const bubble = addMessage("assistant", d.reply, d.modelInfo);
+  
+  // 如果需要顯示城市選擇卡片
+  if (d.showCityCards || (d.engine === "weather" && (d.reply.includes("縣市") || d.reply.includes("城市") || d.reply.includes("選擇")))) {
+    addWeatherCityCards(bubble);
   }
   
-  // 如果有建議問題，加入卡片
-  if(d.suggestions && d.suggestions.length > 0){
-    replyHtml += `<div class="suggestion-cards">${d.suggestions.map(s => {
-      const escaped = escapeHtml(s).replace(/'/g, "&#039;");
-      return `<div class="suggestion-card" onclick="sendSuggestion('${escaped}')">${escapeHtml(s)}</div>`;
-    }).join("")}</div>`;
+  // 如果有建議問題，顯示卡片
+  if (d.suggestions && d.suggestions.length > 0) {
+    addSuggestionCards(d.suggestions, bubble);
   }
   
-  add("assistant", replyHtml, d.modelInfo);
-
-
-  // Debug（若後端有回傳）
-  if(d.debug){
-    addDebug(d.debug);
+  // 如果有天氣資料，顯示天氣卡片
+  if (d.type === "weather-card" && d.data) {
+    addWeatherDisplay(d.data);
   }
-
-  // 天氣卡片
-  if(d.type==="weather-card" && d.data){
-    addWeather(d.data);
-  }else if((d.type==="taiwan-summary" || d.type==="weather-region") && d.data){
-    // 區域摘要：若有選擇區域就顯示一筆；否則顯示四區
-    const sel=d.ui?.selectedRegion;
-    if(sel && d.data[sel]){
-      addWeather({ city:d.data[sel].city, weather:d.data[sel].weather, temp:d.data[sel].temp, rain:d.data[sel].rain });
-    }else{
-      ["北部","中部","南部","東部"].forEach(r=>{
-        if(d.data[r]) addWeather({ city:d.data[r].city, weather:d.data[r].weather, temp:d.data[r].temp, rain:d.data[r].rain });
-      });
-    }
-  }
-
+  
   msg.focus();
 }
 
-function quick(v){ send(v); }
-
-function sendSuggestion(text){
-  // 移除所有建議卡片
-  document.querySelectorAll(".suggestion-cards").forEach(el => el.remove());
-  send(text);
-}
-
-msg.addEventListener("keydown",e=>{
-  // Shift+Enter 或按鈕送出，Enter 換行
-  if(e.key==="Enter" && !e.shiftKey){
+// 鍵盤事件
+msg.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     send();
   }
-  // Enter 單獨按下時允許換行（預設行為）
 });
 
-// 首次載入時顯示歡迎訊息和建議問題
+// 首次載入
 window.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
-    add("assistant", "你好！我是你的聊天大師，什麼都可以聊！😊<br><br>你可以問我天氣、聊天、學習、創意發想等各種話題。", null);
+    const bubble = addMessage(
+      "assistant",
+      "你好！我是你的 AI 聊天助手 🤖\n\n我可以幫你：\n• 查詢天氣資訊\n• 聊天對話\n• 回答各種問題\n\n有什麼我可以幫你的嗎？",
+      null
+    );
+    
     const welcomeSuggestions = [
       "今天台北天氣如何？",
-      "推薦一些適合雨天的心情調適方法",
+      "推薦一些放鬆心情的方法",
       "聊聊最近的生活",
-      "有什麼有趣的話題可以聊？"
+      "有什麼有趣的話題？"
     ];
-    const suggestionsHtml = `<div class="suggestion-cards">${welcomeSuggestions.map(s => {
-      const escaped = escapeHtml(s).replace(/'/g, "&#039;");
-      return `<div class="suggestion-card" onclick="sendSuggestion('${escaped}')">${escapeHtml(s)}</div>`;
-    }).join("")}</div>`;
-    const lastBotMsg = document.querySelector(".row.bot:last-child .bubble");
-    if (lastBotMsg) {
-      lastBotMsg.innerHTML += suggestionsHtml;
-    }
-  }, 500);
+    
+    addSuggestionCards(welcomeSuggestions, bubble);
+  }, 300);
 });
 </script>
 </body>

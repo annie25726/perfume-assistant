@@ -198,9 +198,10 @@ app.post("/api/chat", async (req, res) => {
       ok: true,
       sessionId,
       type: "text",
-      reply: "請直接告訴我縣市或地區（例如：台北 / 北部）",
+      reply: "請選擇城市或直接告訴我縣市名稱",
       engine: "weather",
-      modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" }
+      modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" },
+      showCityCards: true
     });
   }
 
@@ -271,9 +272,10 @@ app.post("/api/chat", async (req, res) => {
       ok: true,
       sessionId,
       type: "text",
-      reply: "你想查哪裡的天氣？直接說縣市或地區就好",
+      reply: "你想查哪裡的天氣？請選擇城市或直接告訴我縣市名稱",
       engine: "weather",
-      modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" }
+      modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" },
+      showCityCards: true
     });
   }
 

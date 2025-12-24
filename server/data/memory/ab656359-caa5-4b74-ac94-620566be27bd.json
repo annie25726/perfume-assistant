@@ -1,0 +1,22 @@
+{
+  "sessionId": "ab656359-caa5-4b74-ac94-620566be27bd",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hi"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！看起來您想問個問題啊！之前我們在聊什麼呢？"
+    },
+    {
+      "role": "user",
+      "content": "有什麼其他問題嗎？"
+    },
+    {
+      "role": "assistant",
+      "content": "您好！看起來您想問個問題啊！之前我們在聊香氛、清潔產品的問題，我們可以繼續討論這個主題還是您想問別的問題？"
+    }
+  ],
+  "intentState": null
+}
