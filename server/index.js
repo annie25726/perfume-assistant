@@ -2,12 +2,35 @@ import dotenv from "dotenv";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import multer from "multer";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 明確指定 .env 檔案路徑
 dotenv.config({ path: path.join(__dirname, ".env") });
+
+// 設定檔案上傳
+const uploadsDir = path.join(__dirname, "data", "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + "-" + file.originalname);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+});
 
 /* ===== Services ===== */
 import {
@@ -32,6 +55,30 @@ const PORT = process.env.PORT || 5050;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(uploadsDir));
+
+// 檔案上傳 API
+app.post("/api/upload", upload.array("files", 10), (req, res) => {
+  try {
+    const files = req.files.map(file => ({
+      name: file.originalname,
+      size: file.size,
+      path: file.path,
+      url: `/uploads/${file.filename}`
+    }));
+    
+    res.json({
+      ok: true,
+      files: files,
+      message: `成功上傳 ${files.length} 個檔案`
+    });
+  } catch (error) {
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    });
+  }
+});
 
 /* ======================
    Utils
@@ -176,7 +223,12 @@ app.post("/api/chat", async (req, res) => {
         type: "text",
         reply: buildWeatherReply(city, weather),
         engine: "weather",
-        modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" }
+        modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" },
+        suggestions: [
+          "還有什麼需要為您服務的嗎？",
+          "其他城市的天氣如何？",
+          "還有其他問題嗎？"
+        ]
       });
     }
 
@@ -248,7 +300,12 @@ app.post("/api/chat", async (req, res) => {
         type: "text",
         reply: buildWeatherReply(city, weather),
         engine: "weather",
-        modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" }
+        modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" },
+        suggestions: [
+          "還有什麼需要為您服務的嗎？",
+          "其他城市的天氣如何？",
+          "還有其他問題嗎？"
+        ]
       });
     }
 
@@ -289,8 +346,15 @@ app.post("/api/chat", async (req, res) => {
     sessionId
   });
 
-  // 使用 LLM 生成的動態建議問題，如果沒有則不顯示
-  const suggestions = (!intentState || !intentState.intent) ? result.suggestions : null;
+  // 確保每次回答後都有建議問題（像 ChatGPT 一樣）
+  // 除非是正在進行中的天氣查詢流程
+  const suggestions = (!intentState || !intentState.intent || intentState.done) 
+    ? (result.suggestions || [
+        "還有什麼需要為您服務的嗎？",
+        "還有其他問題嗎？",
+        "想聊聊其他話題嗎？"
+      ])
+    : null;
 
   return res.json({
     ok: true,

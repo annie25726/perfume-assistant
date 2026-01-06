@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<title>Perfume AI 顧問</title>
+<title>AI 顧問</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
@@ -13,364 +13,374 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", Roboto, sans-serif;
-  background: #343541;
-  color: #ececf1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", Roboto, "Helvetica Neue", sans-serif;
+  background: #f5f7fa;
+  color: #1a1a1a;
   margin: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-/* Header */
+/* Header - 專業風格 */
 header {
-  background: #202123;
-  padding: 12px 16px;
-  border-bottom: 1px solid #4d4d4f;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  z-index: 100;
 }
 
 header h1 {
   font-size: 18px;
   font-weight: 600;
-  color: #ececf1;
-}
-
-.engine-indicator {
-  font-size: 12px;
-  color: #8e8ea0;
+  color: white;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-.engine-pill {
-  background: #40414f;
-  color: #ececf1;
-  padding: 4px 10px;
-  border-radius: 12px;
+header h1::before {
+  content: "🤖";
+  font-size: 20px;
+}
+
+.model-info {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  padding: 5px 14px;
+  border-radius: 16px;
   font-size: 11px;
+  color: white;
   font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
-/* Chat Container */
+/* Chat Container - 專業風格 */
 #log {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 0;
-  background: #343541;
+  padding: 20px;
+  background: linear-gradient(to bottom, #f5f7fa 0%, #e8ecf1 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 #log::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 #log::-webkit-scrollbar-track {
-  background: #343541;
+  background: transparent;
 }
 
 #log::-webkit-scrollbar-thumb {
-  background: #565869;
-  border-radius: 4px;
+  background: #ccc;
+  border-radius: 3px;
 }
 
 #log::-webkit-scrollbar-thumb:hover {
-  background: #6e6e80;
+  background: #999;
 }
 
-/* Message Rows */
-.message-row {
+/* Message Bubbles - LINE 風格 */
+.message-container {
   display: flex;
-  padding: 16px 0;
-  gap: 16px;
-  animation: fadeIn 0.3s ease-in;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+  animation: slideIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.message-row.user {
-  background: #343541;
+.message-container.user {
+  flex-direction: row-reverse;
 }
 
-.message-row.assistant {
-  background: #444654;
-}
-
-.message-row.user .message-content {
-  margin-left: auto;
-  max-width: 85%;
-}
-
-.message-row.assistant .message-content {
-  max-width: 85%;
-}
-
-/* Avatar */
+/* Avatar - 圓形 */
 .avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
   font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .avatar.user {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
 }
 
 .avatar.assistant {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
   color: white;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
 }
 
 /* Message Bubble */
 .message-bubble {
-  background: transparent;
-  padding: 0;
-  line-height: 1.75;
-  font-size: 16px;
-  color: #ececf1;
-  word-wrap: break-word;
-}
-
-.message-row.user .message-bubble {
-  background: #10a37f;
-  padding: 12px 16px;
-  border-radius: 18px 18px 4px 18px;
-  color: white;
   max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  line-height: 1.6;
+  font-size: 15px;
+  word-wrap: break-word;
+  word-break: normal;
+  overflow-wrap: break-word;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  white-space: pre-wrap;
+  display: block;
 }
 
-.message-row.assistant .message-bubble {
-  padding: 0;
+.message-container.user .message-bubble {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
 }
 
-.message-bubble p {
-  margin: 0 0 12px 0;
+.message-container.assistant .message-bubble {
+  background: #ffffff;
+  color: #1a1a1a;
+  border-bottom-left-radius: 4px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.message-bubble p:last-child {
-  margin-bottom: 0;
+.message-time {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.message-container.assistant .message-time {
+  text-align: left;
+  color: #999;
 }
 
 /* Source Info */
 .source-info {
   font-size: 11px;
-  color: #8e8ea0;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #4d4d4f;
+  color: #999;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-/* Suggestion Cards */
-.suggestion-cards {
-  margin-top: 16px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
-}
-
-.suggestion-card {
-  background: #40414f;
-  border: 1px solid #565869;
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  color: #ececf1;
+/* Suggestion Buttons - ChatGPT 風格 */
+.suggestion-buttons {
+  margin-top: 12px;
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.suggestion-card:hover {
-  background: #565869;
-  border-color: #8e8ea0;
+.suggestion-button {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #4f46e5;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.suggestion-button:hover {
+  background: #f8fafc;
+  border-color: #4f46e5;
+  color: #4f46e5;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
 }
 
-.suggestion-card::before {
-  content: "💡";
-  font-size: 16px;
-}
-
-/* Weather City Selection Cards */
+/* Weather City Cards */
 .weather-city-cards {
-  margin-top: 16px;
+  margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
 }
 
 .weather-city-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   border: none;
   border-radius: 12px;
-  padding: 16px;
+  padding: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   text-align: center;
   color: white;
   font-weight: 600;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
 }
 
 .weather-city-card:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-}
-
-.weather-city-card::before {
-  content: "📍";
-  display: block;
-  font-size: 24px;
-  margin-bottom: 8px;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
 }
 
 /* Weather Display Card */
 .weather-display-card {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
   border-radius: 16px;
-  padding: 20px;
-  margin-top: 16px;
+  padding: 18px;
+  margin-top: 12px;
   color: white;
-  box-shadow: 0 4px 16px rgba(245, 87, 108, 0.3);
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.25);
 }
 
 .weather-display-card h3 {
-  font-size: 18px;
-  margin-bottom: 12px;
+  font-size: 16px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.weather-display-card h3::before {
-  content: "☀️";
-  font-size: 24px;
+  gap: 6px;
 }
 
 .weather-info {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .weather-info-item {
   background: rgba(255, 255, 255, 0.2);
-  padding: 12px;
-  border-radius: 10px;
+  padding: 10px;
+  border-radius: 8px;
   backdrop-filter: blur(10px);
 }
 
 .weather-info-item strong {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.9;
   margin-bottom: 4px;
 }
 
 .weather-info-item span {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
-/* Region Buttons */
-.region-buttons {
-  margin-top: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.region-button {
-  background: #40414f;
-  border: 1px solid #565869;
-  border-radius: 12px;
-  padding: 10px 18px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  color: #ececf1;
-  font-weight: 500;
-}
-
-.region-button:hover {
-  background: #565869;
-  border-color: #8e8ea0;
-  transform: translateY(-2px);
-}
-
-/* Input Area */
+/* Input Area - LINE 風格 */
 footer {
-  background: #202123;
-  border-top: 1px solid #4d4d4f;
-  padding: 16px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 14px 20px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
 }
 
 .input-container {
-  max-width: 768px;
-  margin: 0 auto;
-  position: relative;
+  max-width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .input-wrapper {
-  background: #40414f;
-  border: 1px solid #565869;
+  flex: 1;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
   border-radius: 24px;
-  padding: 12px 16px;
+  padding: 12px 18px;
   display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  transition: border-color 0.2s;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
 }
 
 .input-wrapper:focus-within {
-  border-color: #8e8ea0;
+  background: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 textarea {
   flex: 1;
   background: transparent;
   border: none;
-  color: #ececf1;
-  font-size: 16px;
+  color: #333;
+  font-size: 15px;
   font-family: inherit;
   resize: none;
   outline: none;
   min-height: 24px;
-  max-height: 200px;
+  max-height: 120px;
   line-height: 1.5;
   padding: 0;
 }
 
 textarea::placeholder {
-  color: #8e8ea0;
+  color: #999;
+}
+
+/* File Upload Button */
+.file-upload-btn {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s;
+  color: #666;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.file-upload-btn:hover {
+  background: #e2e8f0;
+  color: #4f46e5;
+}
+
+.file-upload-btn::before {
+  content: "📎";
+}
+
+#fileInput {
+  display: none;
 }
 
 .send-button {
-  background: #10a37f;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   border: none;
-  border-radius: 8px;
-  width: 32px;
-  height: 32px;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -378,12 +388,14 @@ textarea::placeholder {
   transition: all 0.2s;
   flex-shrink: 0;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
 }
 
 .send-button:hover:not(:disabled) {
-  background: #0d8f6e;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
 }
 
 .send-button:disabled {
@@ -400,8 +412,9 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #8e8ea0;
+  color: #999;
   font-size: 14px;
+  padding: 10px 14px;
 }
 
 .thinking-dots {
@@ -412,7 +425,7 @@ textarea::placeholder {
 .thinking-dots span {
   width: 6px;
   height: 6px;
-  background: #8e8ea0;
+  background: #999;
   border-radius: 50%;
   animation: thinking 1.4s infinite;
 }
@@ -431,31 +444,32 @@ textarea::placeholder {
     opacity: 0.5;
   }
   30% {
-    transform: translateY(-8px);
+    transform: translateY(-6px);
     opacity: 1;
   }
 }
 
-/* Debug Info */
-.debug-info {
-  background: #2d2d2d;
-  border: 1px dashed #565869;
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 12px;
-  font-size: 12px;
-  color: #8e8ea0;
+/* Model Info Footer */
+.model-footer {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 10px 20px;
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .message-row .message-content {
-    max-width: 90% !important;
+  .message-bubble {
+    max-width: 85%;
   }
   
-  .suggestion-cards,
   .weather-city-cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 </style>
@@ -463,21 +477,24 @@ textarea::placeholder {
 
 <body>
 <header>
-  <h1>🤖 Perfume AI 顧問</h1>
-  <div class="engine-indicator">
-    <span>使用：</span>
-    <span id="engine" class="engine-pill">準備中</span>
-  </div>
+  <h1>AI 顧問</h1>
+  <div id="engine" class="model-info">準備中</div>
 </header>
 
 <div id="log"></div>
 
 <footer>
   <div class="input-container">
+    <button class="file-upload-btn" onclick="document.getElementById('fileInput').click()" title="上傳檔案"></button>
+    <input type="file" id="fileInput" multiple accept="*/*" onchange="handleFileUpload(event)">
     <div class="input-wrapper">
       <textarea id="msg" placeholder="輸入訊息..." rows="1"></textarea>
-      <button id="sendBtn" class="send-button" onclick="send()" title="送出 (Enter)"></button>
     </div>
+    <button id="sendBtn" class="send-button" onclick="send()" title="送出"></button>
+  </div>
+  <div class="model-footer">
+    <span>🤖 <span id="modelName">準備中</span></span>
+    <span id="modelDetails"></span>
   </div>
 </footer>
 
@@ -485,6 +502,8 @@ textarea::placeholder {
 const log = document.getElementById("log");
 const msg = document.getElementById("msg");
 const engineEl = document.getElementById("engine");
+const modelNameEl = document.getElementById("modelName");
+const modelDetailsEl = document.getElementById("modelDetails");
 const sendBtn = document.getElementById("sendBtn");
 let sessionId = "";
 let thinkingEl = null;
@@ -499,22 +518,30 @@ function humanEngineLabel(engine, modelInfo) {
     } else if (provider === "OpenAI") {
       return `🧠 ${model}`;
     } else if (provider === "CWA") {
-      return `☀️ 天氣 API`;
+      return `☀️ 天氣`;
     }
-    return `${model}`;
+    return model;
   }
   
   const map = {
     "huggingface+rag": "🤗 Hugging Face",
     "chatgpt+rag": "🧠 ChatGPT",
-    "weather": "☀️ 天氣工具",
+    "weather": "☀️ 天氣",
     "error": "⚠️ 錯誤"
   };
   return map[engine] || "準備中";
 }
 
 function setEngine(engine, modelInfo) {
-  engineEl.textContent = humanEngineLabel(engine, modelInfo);
+  const label = humanEngineLabel(engine, modelInfo);
+  engineEl.textContent = label;
+  modelNameEl.textContent = label;
+  
+  if (modelInfo) {
+    modelDetailsEl.textContent = `${modelInfo.provider || ""} - ${modelInfo.api || ""}`;
+  } else {
+    modelDetailsEl.textContent = "";
+  }
 }
 
 function escapeHtml(str) {
@@ -527,24 +554,49 @@ function escapeHtml(str) {
 }
 
 function formatMessage(text) {
-  // 將換行轉換為 <br>
-  return escapeHtml(text).replace(/\n/g, "<br>");
+  if (!text) return "";
+  
+  // 轉換為字串
+  let formatted = String(text);
+  
+  // 統一換行符
+  formatted = formatted.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  
+  // 轉義 HTML（這會保留換行符）
+  formatted = escapeHtml(formatted);
+  
+  // 將換行轉為 <br>
+  formatted = formatted.replace(/\n/g, "<br>");
+  
+  return formatted;
+}
+
+function getCurrentTime() {
+  const now = new Date();
+  return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 }
 
 function addMessage(role, content, modelInfo = null) {
-  const row = document.createElement("div");
-  row.className = `message-row ${role}`;
+  const container = document.createElement("div");
+  container.className = `message-container ${role}`;
   
   const avatar = document.createElement("div");
   avatar.className = `avatar ${role}`;
   avatar.textContent = role === "user" ? "你" : "AI";
   
-  const messageContent = document.createElement("div");
-  messageContent.className = "message-content";
+  const messageWrapper = document.createElement("div");
+  messageWrapper.style.display = "flex";
+  messageWrapper.style.flexDirection = "column";
+  messageWrapper.style.maxWidth = "70%";
+  messageWrapper.style.flex = "0 0 auto";
   
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
   bubble.innerHTML = formatMessage(content);
+  
+  const time = document.createElement("div");
+  time.className = "message-time";
+  time.textContent = getCurrentTime();
   
   // 如果是 bot 回覆且有模型資訊，顯示來源
   if (role === "assistant" && modelInfo) {
@@ -554,62 +606,72 @@ function addMessage(role, content, modelInfo = null) {
     bubble.appendChild(sourceInfo);
   }
   
-  messageContent.appendChild(bubble);
-  row.appendChild(avatar);
-  row.appendChild(messageContent);
-  log.appendChild(row);
-  log.scrollTop = log.scrollHeight;
+  messageWrapper.appendChild(bubble);
+  messageWrapper.appendChild(time);
+  container.appendChild(avatar);
+  container.appendChild(messageWrapper);
+  log.appendChild(container);
+  
+  // 自動滾動到底部
+  scrollToBottom();
   
   return bubble;
 }
 
+function scrollToBottom() {
+  setTimeout(() => {
+    log.scrollTop = log.scrollHeight;
+  }, 100);
+}
+
 function addThinking() {
-  const row = document.createElement("div");
-  row.className = "message-row assistant";
+  const container = document.createElement("div");
+  container.className = "message-container assistant";
   
   const avatar = document.createElement("div");
   avatar.className = "avatar assistant";
   avatar.textContent = "AI";
   
-  const messageContent = document.createElement("div");
-  messageContent.className = "message-content";
+  const messageWrapper = document.createElement("div");
+  messageWrapper.style.display = "flex";
+  messageWrapper.style.flexDirection = "column";
   
   const thinking = document.createElement("div");
   thinking.className = "thinking";
   thinking.innerHTML = `
-    <span>思考中</span>
+    <span>正在輸入</span>
     <div class="thinking-dots">
       <span></span><span></span><span></span>
     </div>
   `;
   
-  messageContent.appendChild(thinking);
-  row.appendChild(avatar);
-  row.appendChild(messageContent);
-  log.appendChild(row);
-  log.scrollTop = log.scrollHeight;
+  messageWrapper.appendChild(thinking);
+  container.appendChild(avatar);
+  container.appendChild(messageWrapper);
+  log.appendChild(container);
+  scrollToBottom();
   
-  return row;
+  return container;
 }
 
-function addSuggestionCards(suggestions, bubble) {
+function addSuggestionButtons(suggestions, bubble) {
   if (!suggestions || suggestions.length === 0) return;
   
-  const cardsContainer = document.createElement("div");
-  cardsContainer.className = "suggestion-cards";
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "suggestion-buttons";
   
   suggestions.forEach(suggestion => {
-    const card = document.createElement("div");
-    card.className = "suggestion-card";
-    card.textContent = suggestion;
-    card.onclick = () => {
-      cardsContainer.remove();
+    const button = document.createElement("button");
+    button.className = "suggestion-button";
+    button.textContent = suggestion;
+    button.onclick = () => {
+      buttonsContainer.remove();
       send(suggestion);
     };
-    cardsContainer.appendChild(card);
+    buttonsContainer.appendChild(button);
   });
   
-  bubble.appendChild(cardsContainer);
+  bubble.appendChild(buttonsContainer);
 }
 
 function addWeatherCityCards(bubble) {
@@ -633,20 +695,22 @@ function addWeatherCityCards(bubble) {
 }
 
 function addWeatherDisplay(weatherData) {
-  const row = document.createElement("div");
-  row.className = "message-row assistant";
+  const container = document.createElement("div");
+  container.className = "message-container assistant";
   
   const avatar = document.createElement("div");
   avatar.className = "avatar assistant";
   avatar.textContent = "AI";
   
-  const messageContent = document.createElement("div");
-  messageContent.className = "message-content";
+  const messageWrapper = document.createElement("div");
+  messageWrapper.style.display = "flex";
+  messageWrapper.style.flexDirection = "column";
+  messageWrapper.style.maxWidth = "70%";
   
   const weatherCard = document.createElement("div");
   weatherCard.className = "weather-display-card";
   weatherCard.innerHTML = `
-    <h3>${weatherData.city || "天氣資訊"}</h3>
+    <h3>☀️ ${weatherData.city || "天氣資訊"}</h3>
     <div class="weather-info">
       <div class="weather-info-item">
         <strong>🌡 氣溫</strong>
@@ -659,20 +723,69 @@ function addWeatherDisplay(weatherData) {
     </div>
   `;
   
-  messageContent.appendChild(weatherCard);
-  row.appendChild(avatar);
-  row.appendChild(messageContent);
-  log.appendChild(row);
-  log.scrollTop = log.scrollHeight;
+  const time = document.createElement("div");
+  time.className = "message-time";
+  time.textContent = getCurrentTime();
+  
+  messageWrapper.appendChild(weatherCard);
+  messageWrapper.appendChild(time);
+  container.appendChild(avatar);
+  container.appendChild(messageWrapper);
+  log.appendChild(container);
+  scrollToBottom();
 }
 
 // 自動調整 textarea 高度
 function adjustTextareaHeight() {
   msg.style.height = "auto";
-  msg.style.height = Math.min(msg.scrollHeight, 200) + "px";
+  msg.style.height = Math.min(msg.scrollHeight, 120) + "px";
 }
 
 msg.addEventListener("input", adjustTextareaHeight);
+
+// 檔案上傳處理
+async function handleFileUpload(event) {
+  const files = event.target.files;
+  if (files.length === 0) return;
+  
+  // 顯示上傳中的訊息
+  Array.from(files).forEach(file => {
+    addMessage("user", `📎 上傳中: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
+  });
+  
+  // 上傳檔案
+  try {
+    const formData = new FormData();
+    Array.from(files).forEach(file => {
+      formData.append("files", file);
+    });
+    
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok) {
+      // 更新訊息為成功
+      const lastUserMsg = log.querySelector(".message-container.user:last-child .message-bubble");
+      if (lastUserMsg) {
+        lastUserMsg.innerHTML = `📎 已上傳: ${result.files.map(f => f.name).join(", ")}`;
+      }
+      
+      // AI 回應
+      addMessage("assistant", `已收到 ${result.files.length} 個檔案！我可以幫你處理這些檔案。`, null);
+    } else {
+      addMessage("assistant", `上傳失敗：${result.error || "未知錯誤"}`, null);
+    }
+  } catch (error) {
+    addMessage("assistant", `上傳失敗：${error.message}`, null);
+  }
+  
+  // 重置 input
+  event.target.value = "";
+}
 
 async function send(text) {
   const content = text || msg.value.trim();
@@ -681,8 +794,8 @@ async function send(text) {
   msg.value = "";
   msg.style.height = "auto";
   
-  // 移除所有建議卡片
-  document.querySelectorAll(".suggestion-cards, .weather-city-cards").forEach(el => el.remove());
+  // 移除所有建議按鈕和卡片
+  document.querySelectorAll(".suggestion-buttons, .weather-city-cards").forEach(el => el.remove());
   
   // 顯示用戶訊息
   addMessage("user", content);
@@ -727,9 +840,9 @@ async function send(text) {
     addWeatherCityCards(bubble);
   }
   
-  // 如果有建議問題，顯示卡片
+  // 如果有建議問題，顯示按鈕（ChatGPT 風格）
   if (d.suggestions && d.suggestions.length > 0) {
-    addSuggestionCards(d.suggestions, bubble);
+    addSuggestionButtons(d.suggestions, bubble);
   }
   
   // 如果有天氣資料，顯示天氣卡片
@@ -764,7 +877,7 @@ window.addEventListener("DOMContentLoaded", () => {
       "有什麼有趣的話題？"
     ];
     
-    addSuggestionCards(welcomeSuggestions, bubble);
+    addSuggestionButtons(welcomeSuggestions, bubble);
   }, 300);
 });
 </script>

@@ -4,3 +4,5 @@ dist/
 .DS_Store
 uploads/
 *.log
+server/data/memory/*.json
+server/data/uploads/
