@@ -15,7 +15,7 @@ const DEFAULT_MCP_INTENT_PATTERNS = [
 ];
 
 const DEFAULT_MCP_SSE_URL = "http://127.0.0.1:8000/sse";
-const DEFAULT_MCP_TIMEOUT_MS = 8000;
+const DEFAULT_MCP_TIMEOUT_MS = 60000;
 
 const MCP_QUERY_HINTS = [
   /ICD-?10|ICD|診斷碼|代碼|code/i,

@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 const DEFAULT_ACCOUNTING_SSE_URL = "http://127.0.0.1:5050/mcp/accounting/sse";
-const DEFAULT_MCP_TIMEOUT_MS = 8000;
+const DEFAULT_MCP_TIMEOUT_MS = 60000;
 
 const ACCOUNTING_INTENT_PATTERNS = [
   /記帳|記賬|帳本|帳戶|餘額|交易|明細|收支|支出|收入|分類|月度|財務|對帳|進帳|匯款|轉帳/,
