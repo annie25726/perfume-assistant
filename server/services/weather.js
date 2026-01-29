@@ -26,6 +26,32 @@ function normalizeCityName(city) {
     台中: "臺中市",
     台南: "臺南市",
     高雄: "高雄市",
+    台東: "臺東縣",
+    臺東: "臺東縣",
+    台東縣: "臺東縣",
+    臺東縣: "臺東縣",
+    台東市: "臺東縣",
+    臺東市: "臺東縣",
+    花蓮: "花蓮縣",
+    花蓮縣: "花蓮縣",
+    屏東: "屏東縣",
+    屏東縣: "屏東縣",
+    宜蘭: "宜蘭縣",
+    宜蘭縣: "宜蘭縣",
+    南投: "南投縣",
+    南投縣: "南投縣",
+    雲林: "雲林縣",
+    雲林縣: "雲林縣",
+    嘉義: "嘉義縣",
+    嘉義縣: "嘉義縣",
+    苗栗: "苗栗縣",
+    苗栗縣: "苗栗縣",
+    彰化: "彰化縣",
+    彰化縣: "彰化縣",
+    基隆: "基隆市",
+    新竹: "新竹市",
+    新竹市: "新竹市",
+    新竹縣: "新竹縣",
   };
   return map[city] || city;
 }
@@ -69,6 +95,48 @@ export async function getTaiwanSummary() {
     source: "CWA",
     raw: data
   };
+}
+
+export function formatTaiwanSummary(raw, region) {
+  try {
+    const locations = raw?.records?.location || [];
+    if (!Array.isArray(locations) || locations.length === 0) return null;
+
+    const regionMap = {
+      北部: ["臺北市", "新北市", "基隆市", "桃園市", "新竹市", "新竹縣", "宜蘭縣"],
+      中部: ["苗栗縣", "臺中市", "彰化縣", "南投縣", "雲林縣"],
+      南部: ["嘉義市", "嘉義縣", "臺南市", "高雄市", "屏東縣"],
+      東部: ["花蓮縣", "臺東縣"]
+    };
+
+    const wanted = region === "全台"
+      ? locations
+      : locations.filter(loc => regionMap[region]?.includes(loc.locationName));
+
+    if (!wanted.length) return null;
+
+    const lines = wanted.map(loc => {
+      const elements = loc.weatherElement || [];
+      const wx = elements.find(e => e.elementName === "Wx")
+        ?.time?.[0]?.parameter?.parameterName;
+      const minT = elements.find(e => e.elementName === "MinT")
+        ?.time?.[0]?.parameter?.parameterName;
+      const maxT = elements.find(e => e.elementName === "MaxT")
+        ?.time?.[0]?.parameter?.parameterName;
+      const pop = elements.find(e => e.elementName === "PoP")
+        ?.time?.[0]?.parameter?.parameterName;
+
+      const temp = minT && maxT ? `${minT}～${maxT}°C` : "N/A";
+      const rain = pop ? `${pop}%` : "N/A";
+      const weather = wx || "N/A";
+      return `${loc.locationName}：${weather}，${temp}，降雨 ${rain}`;
+    });
+
+    return lines.join("\n");
+  } catch (error) {
+    console.error("formatTaiwanSummary 錯誤:", error);
+    return null;
+  }
 }
 
 /* ======================

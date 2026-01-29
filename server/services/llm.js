@@ -4,6 +4,8 @@ import { searchRAG, addToRagStore } from "./rag.js";
 import { getWeather, listCities } from "./tools.weather.js";
 import { askHuggingFace } from "./huggingface.js";
 import { askChatGPTWithContext } from "./chatgpt.js";
+import { shouldUseMcp, callMcp, tryAnswerFromMcp } from "./mcp.js";
+import { shouldUseAccountingMcp, callAccountingMcp, tryAnswerFromAccountingMcp, detectAccountingIntents } from "./mcpAccounting.js";
 import { postProcessLLMOutput } from "./textPostProcess.js";
 
 /**
@@ -87,6 +89,35 @@ day 可用：today / tonight / tomorrow / day_after
 `.trim();
 }
 
+function toMcpMeta(source, data) {
+  if (!data) return null;
+  let content = data;
+  if (typeof data === "object" && data.content) {
+    content = data.content;
+  }
+  if (typeof content !== "string") {
+    try {
+      content = JSON.stringify(content, null, 2);
+    } catch {
+      content = String(content);
+    }
+  }
+  return {
+    source,
+    tool: data?.tool || null,
+    content
+  };
+}
+
+function splitAccountingTasks(text) {
+  const raw = String(text || "");
+  const parts = raw
+    .split(/[\n;；。！？!?]+/)
+    .map(item => item.trim())
+    .filter(Boolean);
+  return parts.length > 0 ? parts : [raw.trim()].filter(Boolean);
+}
+
 async function ollamaChat(messages) {
   const base = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
   const model = process.env.OLLAMA_CHAT_MODEL || "qwen2.5:7b";
@@ -168,15 +199,126 @@ export async function chatWithHuggingFace({ message, sessionId }) {
   const sid = getOrCreateSession(sessionId);
   const history = loadMessages(sid);
   const hits = await searchRAG(message, 4);
-  const kbBlock = hits.length
+  const medicalConcern = /肺癌|癌症|腫瘤|呼吸|胸痛|咳嗽|疾病|症狀|生病|診斷|治療|用藥|副作用|就醫|急診|空氣污染|PM2\.5|空氣不好/.test(message);
+  const kbBlockRaw = hits.length
     ? `【知識庫檢索】\n` + hits.map((h, i) =>
         `(${i + 1}) source=${h.source}, score=${h.score}\n${h.text}`
       ).join("\n\n")
     : `【知識庫檢索】\n(目前沒有可用知識片段)`;
+  const kbBlock = medicalConcern
+    ? "【知識庫檢索】\n(略過，避免引入不相關內容)"
+    : kbBlockRaw;
+
+  // MCP（外部權威資料）
+  let mcpData = null;
+  let mcpAnswer = null;
+  let mcpError = null;
+  let mcpUsed = false;
+  let mcpUsedForUi = false;
+  if (shouldUseMcp(message)) {
+    try {
+      mcpData = await callMcp({ question: message });
+      mcpAnswer = tryAnswerFromMcp(mcpData);
+      mcpUsed = !!mcpData;
+    } catch (e) {
+      mcpError = e;
+      console.warn("MCP 呼叫失敗:", e);
+    }
+  }
+
+  // Accounting MCP（記帳）
+  let accountingData = null;
+  let accountingAnswer = null;
+  let accountingError = null;
+  let accountingUsed = false;
+  if (!mcpUsed && shouldUseAccountingMcp(message)) {
+    try {
+      const data = await callAccountingMcp({ question: message });
+      const answer = tryAnswerFromAccountingMcp(data);
+      if (answer) {
+        accountingAnswer = answer;
+        accountingUsed = true;
+        accountingData = data;
+      }
+    } catch (e) {
+      accountingError = e;
+      console.warn("Accounting MCP 呼叫失敗:", e);
+    }
+  }
+
+  // UI 視覺上：健康問題一律顯示 MCP
+  if (medicalConcern) {
+    mcpUsedForUi = true;
+  } else {
+    mcpUsedForUi = mcpUsed;
+  }
+
+  if (mcpAnswer) {
+    const mcpMeta = [toMcpMeta("health", mcpData)].filter(Boolean);
+    appendMessages(sid, [
+      { role: "user", content: message },
+      { role: "assistant", content: mcpAnswer }
+    ]);
+
+    return {
+      sessionId: sid,
+      engine: "mcp",
+      reply: mcpAnswer,
+      rag_hits: hits,
+      modelInfo: { model: "mcp", api: "MCP SSE", provider: "MCP" },
+      mcp: mcpMeta,
+      suggestions: [
+        "還想了解其他嗎？",
+        "還有其他問題嗎？",
+        "想聊聊其他話題嗎？"
+      ],
+      ...(String(process.env.DEBUG_OUTPUT || "0")==="1"
+        ? { debug: { mcp: { data: mcpData, error: mcpError ? String(mcpError) : null } } }
+        : {})
+    };
+  }
+
+  if (accountingAnswer) {
+    const mcpMeta = Array.isArray(accountingData)
+      ? accountingData
+      : [toMcpMeta("accounting", accountingData)].filter(Boolean);
+    appendMessages(sid, [
+      { role: "user", content: message },
+      { role: "assistant", content: accountingAnswer }
+    ]);
+
+    return {
+      sessionId: sid,
+      engine: "mcp-accounting",
+      reply: accountingAnswer,
+      rag_hits: hits,
+      modelInfo: { model: "mcp-accounting", api: "MCP SSE", provider: "MCP" },
+      mcp: mcpMeta,
+      suggestions: [
+        "要查目前餘額嗎？",
+        "要看最近交易記錄嗎？",
+        "要看本月彙總嗎？"
+      ],
+      ...(String(process.env.DEBUG_OUTPUT || "0")==="1"
+        ? { debug: { mcp_accounting: { data: accountingData, error: accountingError ? String(accountingError) : null } } }
+        : {})
+    };
+  }
+
+  const mcpBlock = mcpData
+    ? `【外部權威資料（MCP）】\n${
+        typeof mcpData === "string" ? mcpData : JSON.stringify(mcpData, null, 2)
+      }`
+    : "";
+  const accountingBlock = accountingData
+    ? `【記帳資料（MCP）】\n${
+        typeof accountingData === "string" ? accountingData : JSON.stringify(accountingData, null, 2)
+      }`
+    : "";
 
   // 合併知識庫與歷史訊息
   // 改善對話歷史格式，讓 LLM 更清楚理解上下文
-  const historyContext = history.length > 0 ? 
+  const historyContext = (!medicalConcern && history.length > 0) ? 
     `【對話歷史】\n${history.slice(-6).map((m, i) => {
       if (m.role === 'user') return `用戶：${m.content}`;
       if (m.role === 'assistant') return `助手：${m.content}`;
@@ -214,11 +356,21 @@ export async function chatWithHuggingFace({ message, sessionId }) {
 - 用戶是在問你能不能幫忙查詢/查看，而不是要重新開始對話
 - 你應該說明你的能力限制（例如無法直接查詢外部網站），但可以提供其他幫助方式
 - 不要說「您好！我可以幫助您解答任何問題」這種重新開始的話\n\n` : '';
+
+  const medicalContext = medicalConcern
+    ? `⚠️ 重要：這是健康/疾病相關問題。
+- 請先同理、簡短關心，再提供一般性建議
+- 不要提到香水/香氛/天氣舒適度這類無關內容
+- 不要下診斷；若有緊急症狀，建議就醫
+- 可以詢問必要的補充資訊（症狀、時間、就醫狀況）\n\n`
+    : '';
   
+  const contextBlock = [kbBlock, mcpBlock, accountingBlock].filter(Boolean).join("\n\n");
+
   const prompt = [
     systemPrompt(),
     historyContext,
-    `user: ${kbBlock}\n\n${realtimeContext}${suggestionResponseContext}${messageContext}【使用者問題】\n${message}`
+    `user: ${contextBlock}\n\n${medicalContext}${realtimeContext}${suggestionResponseContext}${messageContext}【使用者問題】\n${message}`
   ].filter(Boolean).join("\n\n");
 
   const hf = await askHuggingFace({ message: prompt });
@@ -236,7 +388,7 @@ export async function chatWithHuggingFace({ message, sessionId }) {
   let debug = null;
 
   if (hfBad && process.env.OPENAI_API_KEY) {
-    const gptRaw = await askChatGPTWithContext({ question: message, ragHits: hits, mcp: null });
+    const gptRaw = await askChatGPTWithContext({ question: message, ragHits: hits, mcp: mcpData });
     const gpt = postProcessLLMOutput(gptRaw, { keepChineseOnly: false });
     assistant = gpt.text;
     engine = "chatgpt+rag";
@@ -245,9 +397,27 @@ export async function chatWithHuggingFace({ message, sessionId }) {
       api: "OpenAI API", 
       provider: "OpenAI" 
     };
-    debug = { fallback: true, hf_meta: hf.meta, hf_usedRetry: hf.usedRetry, gpt_meta: gpt.meta, raw_hf: hf.raw, cleaned_hf: hf.cleaned, raw_gpt: gpt.raw, cleaned_gpt: gpt.cleaned };
+    debug = {
+      fallback: true,
+      hf_meta: hf.meta,
+      hf_usedRetry: hf.usedRetry,
+      gpt_meta: gpt.meta,
+      raw_hf: hf.raw,
+      cleaned_hf: hf.cleaned,
+      raw_gpt: gpt.raw,
+      cleaned_gpt: gpt.cleaned,
+      mcp: { data: mcpData, error: mcpError ? String(mcpError) : null }
+    };
   } else {
-    debug = { fallback: false, hf_meta: hf.meta, hf_usedRetry: hf.usedRetry, raw_hf: hf.raw, cleaned_hf: hf.cleaned };
+    debug = {
+      fallback: false,
+      hf_meta: hf.meta,
+      hf_usedRetry: hf.usedRetry,
+      raw_hf: hf.raw,
+      cleaned_hf: hf.cleaned,
+      mcp: { data: mcpData, error: mcpError ? String(mcpError) : null },
+      mcp_accounting: { data: accountingData, error: accountingError ? String(accountingError) : null }
+    };
   }
 
   // 不處理工具呼叫，僅純 LLM 回答
@@ -256,9 +426,32 @@ export async function chatWithHuggingFace({ message, sessionId }) {
     { role: "assistant", content: assistant }
   ]);
 
+  // 若 MCP 有參與，UI 顯示 MCP
+  if (mcpUsedForUi) {
+    engine = `${engine}+mcp`;
+    modelInfo = {
+      model: "mcp",
+      api: "MCP SSE",
+      provider: "MCP"
+    };
+  }
+
+  if (accountingUsed) {
+    engine = `${engine}+mcp-accounting`;
+  }
+
   // 生成動態建議問題（根據對話內容）
   let suggestions = null;
   try {
+    if (medicalConcern) {
+      suggestions = [
+        "整理可能原因與風險",
+        "說明就醫時該注意什麼",
+        "查相關檢驗或診斷碼",
+        "改問其他健康問題"
+      ];
+    }
+
     // 提取關鍵字和主題
     const allText = `${message} ${assistant}`.toLowerCase();
     const keywords = {
@@ -326,6 +519,16 @@ export async function chatWithHuggingFace({ message, sessionId }) {
       }
     }
 
+    // MCP 參與時，優先給醫療/健康方向的建議
+    if (!suggestions && mcpUsed) {
+      suggestions = [
+        "查其他診斷碼",
+        "查藥品或用藥資訊",
+        "查檢驗項目或指引",
+        "改問其他健康問題"
+      ];
+    }
+
     // 確保至少有通用建議問題（像 ChatGPT 一樣）
     const defaultSuggestions = [
       "還有什麼需要為您服務的嗎？",
@@ -334,11 +537,11 @@ export async function chatWithHuggingFace({ message, sessionId }) {
     ];
     
     // 合併特定建議和通用建議，優先顯示特定建議
-    if (suggestionTemplates.length > 0) {
+    if (!suggestions && suggestionTemplates.length > 0) {
       // 如果有特定建議，加入一個通用問題
       suggestionTemplates.push(defaultSuggestions[0]);
       suggestions = suggestionTemplates.slice(0, 4);
-    } else {
+    } else if (!suggestions) {
       // 如果沒有特定建議，使用通用建議
       suggestions = defaultSuggestions;
     }
@@ -362,12 +565,18 @@ export async function chatWithHuggingFace({ message, sessionId }) {
     ];
   }
 
+  const mcpMetaList = [
+    toMcpMeta("health", mcpData),
+    toMcpMeta("accounting", accountingData)
+  ].filter(Boolean);
+
   return {
     sessionId: sid,
     engine,
     reply: assistant,
     rag_hits: hits,
     modelInfo,
+    mcp: mcpMetaList.length > 0 ? mcpMetaList : null,
     suggestions,
     ...(String(process.env.DEBUG_OUTPUT || "0")==="1" ? { debug } : {})
   };

@@ -36,7 +36,8 @@ const upload = multer({
 import {
   getCityWeather,
   getTaiwanSummary,
-  formatCityWeather
+  formatCityWeather,
+  formatTaiwanSummary
 } from "./services/weather.js";
 
 import {
@@ -46,16 +47,31 @@ import {
 } from "./services/memory.js";
 
 import { chatWithHuggingFace } from "./services/llm.js";
+import { listMcpTools } from "./services/mcp.js";
+import { listAccountingMcpTools } from "./services/mcpAccounting.js";
+import { mountAccountingMcpBridge } from "./services/mcpAccountingBridge.js";
 
 /* ======================
    Basic Setup
 ====================== */
 const app = express();
 const PORT = process.env.PORT || 5050;
+const API_TOKEN = process.env.API_TOKEN || "金鑰";
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(uploadsDir));
+
+// Simple token guard for API endpoints
+app.use("/api", (req, res, next) => {
+  const token = String(req.query.token || "");
+  if (token !== API_TOKEN) {
+    return res.status(401).json({ ok: false, error: "invalid_token" });
+  }
+  return next();
+});
+
+mountAccountingMcpBridge(app);
 
 // 檔案上傳 API
 app.post("/api/upload", upload.array("files", 10), (req, res) => {
@@ -90,8 +106,8 @@ function isWeatherIntent(text = "") {
     /(查|看|問|想知道|了解).*天氣/,
     /天氣.*(如何|怎樣|怎麼樣|好嗎|如何|怎樣|如何|如何)/,
     /(今天|明天|後天|這週|下週).*天氣/,
-    /(台北|新北|台中|台南|高雄|桃園|新竹|基隆|彰化|屏東|花蓮|台東).*天氣/,
-    /天氣.*(台北|新北|台中|台南|高雄|桃園|新竹|基隆|彰化|屏東|花蓮|台東)/,
+    /(台北|臺北|新北|台中|臺中|台南|臺南|高雄|桃園|新竹|基隆|彰化|屏東|花蓮|台東|臺東|台東縣|臺東縣).*天氣/,
+    /天氣.*(台北|臺北|新北|台中|臺中|台南|臺南|高雄|桃園|新竹|基隆|彰化|屏東|花蓮|台東|臺東|台東縣|臺東縣)/,
     /(北部|中部|南部|東部|全台).*天氣/,
     /天氣.*(北部|中部|南部|東部|全台)/,
     /(會|要|可能).*下雨/,
@@ -115,23 +131,37 @@ function isWeatherIntent(text = "") {
 }
 
 function extractCity(text = "") {
-  const cities = [
-    "台北","新北","基隆",
-    "桃園","新竹",
-    "台中","彰化",
-    "台南","高雄",
-    "屏東",
-    "花蓮","台東"
+  const aliases = [
+    { name: "台北", match: ["台北", "臺北", "台北市", "臺北市"] },
+    { name: "新北", match: ["新北", "新北市"] },
+    { name: "基隆", match: ["基隆", "基隆市"] },
+    { name: "桃園", match: ["桃園", "桃園市"] },
+    { name: "新竹", match: ["新竹", "新竹市", "新竹縣"] },
+    { name: "台中", match: ["台中", "臺中", "台中市", "臺中市"] },
+    { name: "彰化", match: ["彰化", "彰化縣"] },
+    { name: "台南", match: ["台南", "臺南", "台南市", "臺南市"] },
+    { name: "高雄", match: ["高雄", "高雄市"] },
+    { name: "屏東", match: ["屏東", "屏東縣"] },
+    { name: "花蓮", match: ["花蓮", "花蓮縣"] },
+    { name: "台東", match: ["台東", "臺東", "台東縣", "臺東縣", "台東市", "臺東市"] }
   ];
-  return cities.find(c => text.includes(c)) || null;
+
+  for (const item of aliases) {
+    if (item.match.some(m => text.includes(m))) {
+      return item.name;
+    }
+  }
+  return null;
 }
 
 function extractRegion(text = "") {
-  if (/北/.test(text)) return "北部";
-  if (/中/.test(text)) return "中部";
-  if (/南/.test(text)) return "南部";
-  if (/東/.test(text)) return "東部";
-  if (/全/.test(text)) return "全台";
+  // 避免「臺東/台東」誤判為「東部」
+  if (/臺東|台東/.test(text)) return null;
+  if (/北部/.test(text)) return "北部";
+  if (/中部/.test(text)) return "中部";
+  if (/南部/.test(text)) return "南部";
+  if (/東部/.test(text)) return "東部";
+  if (/全台|全國|全省/.test(text)) return "全台";
   return null;
 }
 
@@ -234,13 +264,14 @@ app.post("/api/chat", async (req, res) => {
 
     if (region) {
       const summary = await getTaiwanSummary();
+      const summaryText = formatTaiwanSummary(summary?.raw, region);
       setIntentState(sessionId, { intent: "weather", done: true });
 
       return res.json({
         ok: true,
         sessionId,
         type: "text",
-        reply: `【${region}】天氣概況：\n${summary || "暫無資料"}`,
+        reply: `【${region}】天氣概況：\n${summaryText || "暫無資料"}`,
         engine: "weather",
         modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" }
       });
@@ -311,13 +342,14 @@ app.post("/api/chat", async (req, res) => {
 
     if (region) {
       const summary = await getTaiwanSummary();
+      const summaryText = formatTaiwanSummary(summary?.raw, region);
       setIntentState(sessionId, { intent: "weather", done: true });
 
       return res.json({
         ok: true,
         sessionId,
         type: "text",
-        reply: `【${region}】天氣概況：\n${summary || "暫無資料"}`,
+        reply: `【${region}】天氣概況：\n${summaryText || "暫無資料"}`,
         engine: "weather",
         modelInfo: { model: "CWA API", api: "中央氣象署開放資料平台", provider: "CWA" }
       });
@@ -363,8 +395,30 @@ app.post("/api/chat", async (req, res) => {
     reply: result.reply,
     engine: result.engine,
     modelInfo: result.modelInfo,
-    suggestions
+    suggestions,
+    ...(String(process.env.DEBUG_OUTPUT || "0")==="1" ? { debug: result.debug } : {})
   });
+});
+
+/* ======================
+   MCP Tools
+====================== */
+app.get("/api/mcp/tools", async (req, res) => {
+  try {
+    const tools = await listMcpTools();
+    return res.json({ ok: true, tools });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+app.get("/api/mcp/accounting/tools", async (req, res) => {
+  try {
+    const tools = await listAccountingMcpTools();
+    return res.json({ ok: true, tools });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
 });
 
 /* ======================
